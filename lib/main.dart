@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sqflite/sqflite.dart';
+import 'dart:async';
 import './transaction.dart';
+import './dbHelper.dart';
 
-void main() async{
+void main() 
+{
   runApp(MyExpenses());
 }
 
@@ -13,23 +17,33 @@ class MyExpenses extends StatefulWidget {
 
 class _MyExpensesState extends State<MyExpenses> {
 
-  List<Transactions> items = [
-    Transactions(id: 'i1', title: 'Shoes', amt: 1999, date: DateTime.now()),
-    Transactions(id: 'i2', title: 'Snacks', amt: 350, date: DateTime.now()),
-    Transactions(id: 'i3', title: 'Fruits', amt: 275, date: DateTime.now()),
-  ];
+  DBhelper db = DBhelper();
+  List<Transactions> items;
+  int count=0;
   String titleInput;
   String amountInput;
 
+  void save(String t,double a,DateTime d) async
+  {
+    int res= await db.getCount();
+    await db.insertTransaction(Transactions(id: res+1,title: t,amt: a,date: d));
+    items = await db.getTransactionList();
+  }
+
   void addItem(String t,double a,DateTime d)
   {
+    save(t,a,d);
     setState(() {
-      items.add(Transactions(id: 't1',title: t,amt: a,date: d));
+      //items.add(Transactions(id: 4,title: t,amt: a,date: d));
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    
+    if(items == null)
+      items = List<Transactions>();
+
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
